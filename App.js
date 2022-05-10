@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-shadow */
 /* eslint-disable react-native/no-inline-styles */
@@ -23,6 +24,7 @@ import {
   Text,
   Provider,
   Title,
+  Surface,
 } from 'react-native-paper';
 import SplashScreen from 'react-native-splash-screen';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
@@ -41,6 +43,7 @@ const App = () => {
   const [overdueItems, setOverdueItems] = useState([]);
   const [d, setD] = useState(new Date());
   const [finishedItems, setFinishedItems] = useState([]);
+  const [greet, setGreet] = useState('Good Day Champ');
   const months = [
     'Jan',
     'Feb',
@@ -391,41 +394,47 @@ const App = () => {
     getItems();
   }, []);
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: '#344FA1', paddingHorizontal: 20}}>
       <StatusBar
         animated={true}
-        backgroundColor="#8E05C2"
+        backgroundColor="#344FA1"
         barStyle="light-content"
       />
 
-      <Appbar.Header style={{backgroundColor: '#8E05C2'}}>
-        <Appbar.Content
-          title="To do"
-          subtitle={'Create a list of what to do'}
-        />
+      <Appbar.Header style={{backgroundColor: '#344FA1', elevation: 0}}>
+        <TouchableRipple onPress={showModal}>
+          <Appbar.Action icon="plus" color="#aaa" />
+        </TouchableRipple>
         <TouchableRipple
           onPress={showfinishedModal}
           rippleColor="rgba(1, 1, 1, .32)">
-          <Appbar.Action icon="calendar-check" color="#fff" />
-        </TouchableRipple>
-        <TouchableRipple onPress={showModal} rippleColor="rgba(1, 1, 1, .32)">
-          <Appbar.Action icon="plus" color="#fff" />
+          <Appbar.Action icon="calendar-check" color="#aaa" />
         </TouchableRipple>
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {overdueItems.length !== 0 ? (
-          <Title
-            style={{color: '#fc1239', textAlign: 'left', marginBottom: 20}}>
-            Overdue Tasks
-          </Title>
-        ) : (
-          <></>
-        )}
+      <Title style={{
+          color: '#fff',
+          textAlign: 'left',
+          marginVertical: 20,
+          fontSize: 35,
+        }}>{greet}</Title>
+
+      {/* <ScrollView contentContainerStyle={styles.content}> */}
+      <Title
+        style={{
+          color: '#aaa',
+          textAlign: 'left',
+          marginBottom: 10,
+          fontSize: 15,
+        }}>
+        Overdue Tasks
+      </Title>
+      <ScrollView contentContainerStyle={styles.content} horizontal={true}>
         {overdueItems.length !== 0 ? (
           overdueItems.map((item, i) => {
             return (
-              <View key={i} style={styles.list2}>
+              <Surface key={i} style={styles.list2}>
                 {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
@@ -435,11 +444,11 @@ const App = () => {
 
                 <BouncyCheckbox
                   size={20}
-                  fillColor="#fc1239"
+                  fillColor="#042159"
                   unfillColor="#FFFFFF"
                   isChecked={false}
                   text={item.task}
-                  iconStyle={{borderColor: '#fc1239'}}
+                  iconStyle={{borderColor: '#042159'}}
                   textStyle={{fontFamily: 'JosefinSans-Regular', color: '#fff'}}
                   onPress={() => {
                     setChecked(!checked);
@@ -448,27 +457,31 @@ const App = () => {
                 />
                 <Text
                   style={{
-                    color: '#333',
-                    marginTop: 10,
+                    color: '#344FA1',
+                    marginTop: 20,
                   }}>{`${item.date}, ${item.time}`}</Text>
-              </View>
+              </Surface>
             );
           })
         ) : (
           <Text style={{color: '#aaa'}}>No overdue tasks</Text>
         )}
-        {todayItems.length !== 0 ? (
-          <Title
-            style={{color: '#020ffa', textAlign: 'left', marginVertical: 20}}>
-            Today Tasks
-          </Title>
-        ) : (
-          <></>
-        )}
+      </ScrollView>
+
+      <Title
+        style={{
+          color: '#aaa',
+          textAlign: 'left',
+          marginBottom: 10,
+          fontSize: 15,
+        }}>
+        Today Tasks
+      </Title>
+      <ScrollView contentContainerStyle={styles.content} horizontal={true}>
         {todayItems.length !== 0 ? (
           todayItems.map((item, i) => {
             return (
-              <View key={i} style={styles.list3}>
+              <Surface key={i} style={styles.list2}>
                 {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
@@ -478,11 +491,11 @@ const App = () => {
 
                 <BouncyCheckbox
                   size={20}
-                  fillColor="#020ffa"
+                  fillColor="#042159"
                   unfillColor="#FFFFFF"
                   isChecked={false}
                   text={item.task}
-                  iconStyle={{borderColor: '#020ffa'}}
+                  iconStyle={{borderColor: '#042159'}}
                   textStyle={{fontFamily: 'JosefinSans-Regular', color: '#fff'}}
                   onPress={() => {
                     setChecked(!checked);
@@ -491,28 +504,30 @@ const App = () => {
                 />
                 <Text
                   style={{
-                    color: '#aaa',
-                    marginTop: 10,
+                    color: '#344FA1',
+                    marginTop: 20,
                   }}>{`${item.date}, ${item.time}`}</Text>
-              </View>
+              </Surface>
             );
           })
         ) : (
           <Text style={{color: '#aaa'}}>No tasks scheduled for today</Text>
         )}
-
-        {otherItems.length !== 0 ? (
-          <Title
-            style={{color: '#8E05C2', textAlign: 'left', marginVertical: 20}}>
-            Other Tasks
-          </Title>
-        ) : (
-          <></>
-        )}
+      </ScrollView>
+      <Title
+        style={{
+          color: '#aaa',
+          textAlign: 'left',
+          marginBottom: 10,
+          fontSize: 15,
+        }}>
+        Other Tasks
+      </Title>
+      <ScrollView contentContainerStyle={styles.content}>
         {otherItems.length !== 0 ? (
           otherItems.map((item, i) => {
             return (
-              <View key={i} style={styles.list}>
+              <Surface key={i} style={styles.list3}>
                 {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
@@ -522,11 +537,11 @@ const App = () => {
 
                 <BouncyCheckbox
                   size={20}
-                  fillColor="#8E05C2"
+                  fillColor="#042159"
                   unfillColor="#FFFFFF"
                   isChecked={false}
                   text={item.task}
-                  iconStyle={{borderColor: '#8E05C2'}}
+                  iconStyle={{borderColor: '#042159'}}
                   textStyle={{fontFamily: 'JosefinSans-Regular', color: '#fff'}}
                   onPress={() => {
                     setChecked(!checked);
@@ -535,16 +550,17 @@ const App = () => {
                 />
                 <Text
                   style={{
-                    color: '#aaa',
+                    color: '#344FA1',
                     marginTop: 10,
                   }}>{`${item.date}, ${item.time}`}</Text>
-              </View>
+              </Surface>
             );
           })
         ) : (
           <Text style={{color: '#aaa'}}>No other tasks</Text>
         )}
       </ScrollView>
+      {/* </ScrollView> */}
 
       <FAB style={styles.fab} icon="plus" onPress={showModal} />
 
@@ -660,7 +676,8 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     paddingVertical: 20,
-    paddingHorizontal: 20,
+    paddingRight: 20,
+    height: 130,
   },
   text: {
     fontSize: 20,
@@ -671,29 +688,28 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignItems: 'center',
   },
-  list: {
-    backgroundColor: '#8E05C2',
-    width: '90%',
-    marginBottom: 20,
-    borderRadius: 10,
-    padding: 15,
-  },
   list2: {
-    backgroundColor: '#fc1239',
-    width: '90%',
-    marginBottom: 20,
+    backgroundColor: '#042159',
+    justifyContent: 'center',
+    width: 220,
     borderRadius: 10,
-    padding: 15,
+    height: 120,
+    marginHorizontal: 10,
+    padding: 20,
+    elevation: 10,
   },
   list3: {
-    backgroundColor: '#020ffa',
-    width: '90%',
-    marginBottom: 20,
+    backgroundColor: '#042159',
+    justifyContent: 'center',
+    width: '100%',
     borderRadius: 10,
-    padding: 15,
+    height: 70,
+    marginHorizontal: 10,
+    padding: 20,
+    elevation: 10,
   },
   list4: {
-    backgroundColor: '#8E05C2',
+    backgroundColor: '#042159',
     width: '100%',
     marginVertical: 20,
     borderRadius: 10,
