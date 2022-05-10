@@ -194,6 +194,7 @@ const App = () => {
         setDate('No date selected');
         setTime('No time selected');
         getItems();
+        hideModal();
       });
     } catch (error) {
       // Error saving data
