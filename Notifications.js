@@ -33,15 +33,15 @@ class Notifications {
     );
 
     PushNotification.getScheduledLocalNotifications(rn => {
-      console.log('SN --- ', rn);
+      //console.log('SN --- ', rn);
     });
   }
 
   schduleNotification(date, message) {
     PushNotification.localNotificationSchedule({
       channelId: 'reminders',
-      title: '🔔 Reminder!',
-      message: message,
+      title: message,
+      message: '🔔 Reminder! You are supposed to do this task right now.',
       date,
     });
   }
