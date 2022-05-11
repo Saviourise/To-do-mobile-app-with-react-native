@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-shadow */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -25,9 +25,12 @@ import {
   Provider,
   Title,
   Surface,
+  IconButton,
 } from 'react-native-paper';
 import SplashScreen from 'react-native-splash-screen';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 
 const App = () => {
   const [text, setText] = useState('');
@@ -59,11 +62,25 @@ const App = () => {
     'Dec',
   ];
 
-  const showModal = () => setVisible(true);
-  const hideModal = () => {
-    setVisible(false);
-    hideDatePicker();
-  };
+  // ref
+  const bottomSheetModalRef = useRef(null);
+
+  // variables
+  const snapPoints = useMemo(() => ['25%', '50%'], []);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    //console.log('handleSheetChanges', index);
+  }, []);
+
+  // const showModal = () => setVisible(true);
+  // const hideModal = () => {
+  //   setVisible(false);
+  //   hideDatePicker();
+  // };
 
   const showfinishedModal = () => setFinishedVisible(true);
   const hidefinishedModal = () => {
@@ -197,7 +214,8 @@ const App = () => {
         setDate('No date selected');
         setTime('No time selected');
         getItems();
-        hideModal();
+        bottomSheetModalRef.current?.dismiss();
+        //hideModal();
       });
     } catch (error) {
       // Error saving data
@@ -390,187 +408,320 @@ const App = () => {
 
   //Hide Splash screen on app load.
   useEffect(() => {
-    SplashScreen.hide();
     getItems();
+    setTimeout(function () {
+      SplashScreen.hide();
+    }, 2000);
   }, []);
   return (
-    <SafeAreaView
-      style={{flex: 1, backgroundColor: '#344FA1', paddingHorizontal: 20}}>
-      <StatusBar
-        animated={true}
-        backgroundColor="#344FA1"
-        barStyle="light-content"
-      />
+    <GestureHandlerRootView style={{flex: 1}}>
+      <SafeAreaView
+        style={{flex: 1, backgroundColor: '#344FA1', paddingHorizontal: 20}}>
+        <StatusBar
+          animated={true}
+          backgroundColor="#344FA1"
+          barStyle="light-content"
+        />
 
-      <Appbar.Header style={{backgroundColor: '#344FA1', elevation: 0}}>
-        <TouchableRipple onPress={showModal}>
-          <Appbar.Action icon="plus" color="#aaa" />
-        </TouchableRipple>
-        <TouchableRipple
-          onPress={showfinishedModal}
-          rippleColor="rgba(1, 1, 1, .32)">
-          <Appbar.Action icon="calendar-check" color="#aaa" />
-        </TouchableRipple>
-      </Appbar.Header>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: -20, marginVertical: 10,}}>
+          <IconButton
+            icon="plus"
+            color="#fff"
+            size={25}
+            onPress={handlePresentModalPress}
+          />
+          <IconButton
+            icon="calendar-check"
+            color="#ffff"
+            size={25}
+            onPress={showfinishedModal}
+          />
+        </View>
 
-      <Title style={{
-          color: '#fff',
-          textAlign: 'left',
-          marginVertical: 20,
-          fontSize: 35,
-        }}>{greet}</Title>
+        <Title
+          style={{
+            color: '#fff',
+            textAlign: 'left',
+            marginVertical: 20,
+            fontSize: 35,
+          }}>
+          {greet}
+        </Title>
 
-      {/* <ScrollView contentContainerStyle={styles.content}> */}
-      <Title
-        style={{
-          color: '#aaa',
-          textAlign: 'left',
-          marginBottom: 10,
-          fontSize: 15,
-        }}>
-        Overdue Tasks
-      </Title>
-      <ScrollView contentContainerStyle={styles.content} horizontal={true}>
-        {overdueItems.length !== 0 ? (
-          overdueItems.map((item, i) => {
-            return (
-              <Surface key={i} style={styles.list2}>
-                {/* <Checkbox
+        {/* <ScrollView contentContainerStyle={styles.content}> */}
+        <Title
+          style={{
+            color: '#aaa',
+            textAlign: 'left',
+            marginBottom: 10,
+            fontSize: 15,
+          }}>
+          Overdue Tasks
+        </Title>
+        <ScrollView contentContainerStyle={styles.content} horizontal={true}>
+          {overdueItems.length !== 0 ? (
+            overdueItems.map((item, i) => {
+              return (
+                <Surface key={i} style={styles.list2}>
+                  {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
                   setChecked(!checked);
                 }}
               /> */}
 
-                <BouncyCheckbox
-                  size={20}
-                  fillColor="#042159"
-                  unfillColor="#FFFFFF"
-                  isChecked={false}
-                  text={item.task}
-                  iconStyle={{borderColor: '#042159'}}
-                  textStyle={{fontFamily: 'JosefinSans-Regular', color: '#fff'}}
-                  onPress={() => {
-                    setChecked(!checked);
-                    delItem(item.task, item.date, item.time, item.millisecs);
-                  }}
-                />
-                <Text
-                  style={{
-                    color: '#344FA1',
-                    marginTop: 20,
-                  }}>{`${item.date}, ${item.time}`}</Text>
-              </Surface>
-            );
-          })
-        ) : (
-          <Text style={{color: '#aaa'}}>No overdue tasks</Text>
-        )}
-      </ScrollView>
+                  <BouncyCheckbox
+                    size={20}
+                    fillColor="#042159"
+                    unfillColor="#FFFFFF"
+                    isChecked={false}
+                    text={item.task}
+                    iconStyle={{borderColor: '#042159'}}
+                    textStyle={{
+                      fontFamily: 'JosefinSans-Regular',
+                      color: '#fff',
+                    }}
+                    onPress={() => {
+                      setChecked(!checked);
+                      delItem(item.task, item.date, item.time, item.millisecs);
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: '#344FA1',
+                      marginTop: 20,
+                    }}>{`${item.date}, ${item.time}`}</Text>
+                </Surface>
+              );
+            })
+          ) : (
+            <Text style={{color: '#aaa'}}>No overdue tasks</Text>
+          )}
+        </ScrollView>
 
-      <Title
-        style={{
-          color: '#aaa',
-          textAlign: 'left',
-          marginBottom: 10,
-          fontSize: 15,
-        }}>
-        Today Tasks
-      </Title>
-      <ScrollView contentContainerStyle={styles.content} horizontal={true}>
-        {todayItems.length !== 0 ? (
-          todayItems.map((item, i) => {
-            return (
-              <Surface key={i} style={styles.list2}>
-                {/* <Checkbox
+        <Title
+          style={{
+            color: '#aaa',
+            textAlign: 'left',
+            marginBottom: 10,
+            fontSize: 15,
+          }}>
+          Today Tasks
+        </Title>
+        <ScrollView contentContainerStyle={styles.content} horizontal={true}>
+          {todayItems.length !== 0 ? (
+            todayItems.map((item, i) => {
+              return (
+                <Surface key={i} style={styles.list2}>
+                  {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
                   setChecked(!checked);
                 }}
               /> */}
 
-                <BouncyCheckbox
-                  size={20}
-                  fillColor="#042159"
-                  unfillColor="#FFFFFF"
-                  isChecked={false}
-                  text={item.task}
-                  iconStyle={{borderColor: '#042159'}}
-                  textStyle={{fontFamily: 'JosefinSans-Regular', color: '#fff'}}
-                  onPress={() => {
-                    setChecked(!checked);
-                    delItem(item.task, item.date, item.time, item.millisecs);
-                  }}
-                />
-                <Text
-                  style={{
-                    color: '#344FA1',
-                    marginTop: 20,
-                  }}>{`${item.date}, ${item.time}`}</Text>
-              </Surface>
-            );
-          })
-        ) : (
-          <Text style={{color: '#aaa'}}>No tasks scheduled for today</Text>
-        )}
-      </ScrollView>
-      <Title
-        style={{
-          color: '#aaa',
-          textAlign: 'left',
-          marginBottom: 10,
-          fontSize: 15,
-        }}>
-        Other Tasks
-      </Title>
-      <ScrollView contentContainerStyle={styles.content}>
-        {otherItems.length !== 0 ? (
-          otherItems.map((item, i) => {
-            return (
-              <Surface key={i} style={styles.list3}>
-                {/* <Checkbox
+                  <BouncyCheckbox
+                    size={20}
+                    fillColor="#042159"
+                    unfillColor="#FFFFFF"
+                    isChecked={false}
+                    text={item.task}
+                    iconStyle={{borderColor: '#042159'}}
+                    textStyle={{
+                      fontFamily: 'JosefinSans-Regular',
+                      color: '#fff',
+                    }}
+                    onPress={() => {
+                      setChecked(!checked);
+                      delItem(item.task, item.date, item.time, item.millisecs);
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: '#344FA1',
+                      marginTop: 20,
+                    }}>{`${item.date}, ${item.time}`}</Text>
+                </Surface>
+              );
+            })
+          ) : (
+            <Text style={{color: '#aaa'}}>No tasks scheduled for today</Text>
+          )}
+        </ScrollView>
+        <Title
+          style={{
+            color: '#aaa',
+            textAlign: 'left',
+            marginBottom: 10,
+            fontSize: 15,
+          }}>
+          Other Tasks
+        </Title>
+        <ScrollView contentContainerStyle={styles.content}>
+          {otherItems.length !== 0 ? (
+            otherItems.map((item, i) => {
+              return (
+                <Surface key={i} style={styles.list3}>
+                  {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
                   setChecked(!checked);
                 }}
               /> */}
 
-                <BouncyCheckbox
-                  size={20}
-                  fillColor="#042159"
-                  unfillColor="#FFFFFF"
-                  isChecked={false}
-                  text={item.task}
-                  iconStyle={{borderColor: '#042159'}}
-                  textStyle={{fontFamily: 'JosefinSans-Regular', color: '#fff'}}
-                  onPress={() => {
-                    setChecked(!checked);
-                    delItem(item.task, item.date, item.time, item.millisecs);
-                  }}
+                  <BouncyCheckbox
+                    size={20}
+                    fillColor="#042159"
+                    unfillColor="#FFFFFF"
+                    isChecked={false}
+                    text={item.task}
+                    iconStyle={{borderColor: '#042159'}}
+                    textStyle={{
+                      fontFamily: 'JosefinSans-Regular',
+                      color: '#fff',
+                    }}
+                    onPress={() => {
+                      setChecked(!checked);
+                      delItem(item.task, item.date, item.time, item.millisecs);
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: '#344FA1',
+                      marginTop: 10,
+                    }}>{`${item.date}, ${item.time}`}</Text>
+                </Surface>
+              );
+            })
+          ) : (
+            <Text style={{color: '#aaa'}}>No other tasks</Text>
+          )}
+        </ScrollView>
+        {/* </ScrollView> */}
+
+        <FAB style={styles.fab} icon="plus" onPress={handlePresentModalPress} />
+
+        <Provider>
+          <Portal>
+            {/* <Modal
+              visible={visible}
+              onDismiss={hideModal}
+              contentContainerStyle={styles.containerStyle}>
+              <Text
+                style={{fontSize: 20, color: '#8E05C2', textAlign: 'center'}}>
+                Add a task!
+              </Text>
+              <View style={styles.header}>
+                <TextInput
+                  placeholder="Input Task"
+                  value={text}
+                  onChangeText={text => setText(text)}
+                  activeUnderlineColor="#8E05C2"
+                  style={{width: '100%', height: 40, marginVertical: 20}}
                 />
-                <Text
+                <View
                   style={{
-                    color: '#344FA1',
-                    marginTop: 10,
-                  }}>{`${item.date}, ${item.time}`}</Text>
-              </Surface>
-            );
-          })
-        ) : (
-          <Text style={{color: '#aaa'}}>No other tasks</Text>
-        )}
-      </ScrollView>
-      {/* </ScrollView> */}
+                    width: '100%',
+                    justifyContent: 'space-evenly',
+                    flexDirection: 'row',
+                    marginBottom: 20,
+                  }}>
+                  <Text
+                    style={{color: '#aaa', width: '50%', textAlign: 'center'}}>
+                    {date}
+                  </Text>
+                  <Text
+                    style={{color: '#aaa', width: '50%', textAlign: 'center'}}>
+                    {time}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    width: '100%',
+                    justifyContent: 'space-evenly',
+                    flexDirection: 'row',
+                  }}>
+                  <Button
+                    color="#8E05C2"
+                    mode="outlined"
+                    onPress={showDatePicker}
+                    style={{width: '40%', marginBottom: 20}}>
+                    Add date
+                  </Button>
+                  <Button
+                    color="#8E05C2"
+                    mode="outlined"
+                    onPress={showTimePicker}
+                    style={{width: '40%', marginBottom: 20}}>
+                    Add Time
+                  </Button>
+                </View>
+                <Button
+                  color="#8E05C2"
+                  mode="contained"
+                  onPress={addText}
+                  style={{width: '100%', marginVertical: 20}}>
+                  Add Task
+                </Button>
+              </View>
+            </Modal> */}
 
-      <FAB style={styles.fab} icon="plus" onPress={showModal} />
-
-      <Provider>
-        <Portal>
-          <Modal
-            visible={visible}
-            onDismiss={hideModal}
-            contentContainerStyle={styles.containerStyle}>
-            <Text style={{fontSize: 20, color: '#8E05C2', textAlign: 'center'}}>
+            <Modal
+              visible={finishedvisible}
+              onDismiss={hidefinishedModal}
+              contentContainerStyle={styles.containerStyle}>
+              <Text
+                style={{fontSize: 20, color: '#D707F2', textAlign: 'center'}}>
+                Finished Tasks!
+              </Text>
+              <ScrollView>
+                {finishedItems.length !== 0 ? (
+                  finishedItems.map((item, i) => {
+                    return (
+                      <View key={i} style={styles.list4}>
+                        <Text
+                          style={{
+                            color: '#fff',
+                            fontSize: 20,
+                          }}>{`${item.task}`}</Text>
+                        <Text
+                          style={{
+                            color: '#aaa',
+                            marginTop: 10,
+                          }}>{`${item.date}, ${item.time}`}</Text>
+                      </View>
+                    );
+                  })
+                ) : (
+                  <Text style={{color: '#aaa'}}>No finsihed tasks</Text>
+                )}
+              </ScrollView>
+            </Modal>
+          </Portal>
+        </Provider>
+        <View>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode={dateMode}
+            onConfirm={selDate => handleConfirm(selDate)}
+            onCancel={hideDatePicker}
+          />
+        </View>
+        <BottomSheetModalProvider>
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            index={1}
+            snapPoints={snapPoints}
+            onChange={handleSheetChanges}
+            style={styles.sheet}
+            keyboardBehavior="fillParent">
+            <Text
+              style={{
+                fontSize: 30,
+                color: '#000',
+                textAlign: 'center',
+                marginVertical: 20,
+              }}>
               Add a task!
             </Text>
             <View style={styles.header}>
@@ -578,9 +729,31 @@ const App = () => {
                 placeholder="Input Task"
                 value={text}
                 onChangeText={text => setText(text)}
-                activeUnderlineColor="#8E05C2"
+                outlineColor="#fff"
+                activeOutlineColor="#D707F2"
+                mode="outlined"
                 style={{width: '100%', height: 40, marginVertical: 20}}
               />
+
+              <View
+                style={{
+                  width: '100%',
+                  justifyContent: 'space-around',
+                  flexDirection: 'row',
+                }}>
+                <IconButton
+                  icon="calendar"
+                  color="#D707F2"
+                  size={30}
+                  onPress={showDatePicker}
+                />
+                <IconButton
+                  icon="clock"
+                  color="#D707F2"
+                  size={30}
+                  onPress={showTimePicker}
+                />
+              </View>
               <View
                 style={{
                   width: '100%',
@@ -597,82 +770,42 @@ const App = () => {
                   {time}
                 </Text>
               </View>
-              <View
-                style={{
-                  width: '100%',
-                  justifyContent: 'space-evenly',
-                  flexDirection: 'row',
-                }}>
-                <Button
-                  color="#8E05C2"
-                  mode="outlined"
-                  onPress={showDatePicker}
-                  style={{width: '40%', marginBottom: 20}}>
-                  Add date
-                </Button>
-                <Button
-                  color="#8E05C2"
-                  mode="outlined"
-                  onPress={showTimePicker}
-                  style={{width: '40%', marginBottom: 20}}>
-                  Add Time
-                </Button>
-              </View>
               <Button
-                color="#8E05C2"
+                color="#D707F2"
                 mode="contained"
                 onPress={addText}
                 style={{width: '100%', marginVertical: 20}}>
                 Add Task
               </Button>
             </View>
-          </Modal>
-
-          <Modal
-            visible={finishedvisible}
-            onDismiss={hidefinishedModal}
-            contentContainerStyle={styles.containerStyle}>
-            <Text style={{fontSize: 20, color: '#8E05C2', textAlign: 'center'}}>
-              Finished Tasks!
-            </Text>
-            <ScrollView>
-              {finishedItems.length !== 0 ? (
-                finishedItems.map((item, i) => {
-                  return (
-                    <View key={i} style={styles.list4}>
-                      <Text
-                        style={{
-                          color: '#fff',
-                          fontSize: 20,
-                        }}>{`${item.task}`}</Text>
-                      <Text
-                        style={{
-                          color: '#aaa',
-                          marginTop: 10,
-                        }}>{`${item.date}, ${item.time}`}</Text>
-                    </View>
-                  );
-                })
-              ) : (
-                <Text style={{color: '#aaa'}}>No finsihed tasks</Text>
-              )}
-            </ScrollView>
-          </Modal>
-        </Portal>
-      </Provider>
-      <View>
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode={dateMode}
-          onConfirm={selDate => handleConfirm(selDate)}
-          onCancel={hideDatePicker}
-        />
-      </View>
-    </SafeAreaView>
+          </BottomSheetModal>
+        </BottomSheetModalProvider>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
+  sheet: {
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+
+    elevation: 46,
+  },
+  container: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: 'grey',
+  },
+  contentContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   content: {
     alignItems: 'center',
     paddingVertical: 20,
@@ -685,7 +818,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    paddingVertical: 20,
+    paddingHorizontal: 30,
     alignItems: 'center',
   },
   list2: {
@@ -720,12 +853,13 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#8E05C2',
+    backgroundColor: '#D707F2',
   },
   containerStyle: {
     backgroundColor: '#fff',
     padding: 30,
     margin: 30,
+    borderRadius: 10,
   },
 });
 
