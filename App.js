@@ -228,6 +228,15 @@ const App = () => {
   };
 
   const getItems = async () => {
+    let greetHrs = new Date().getHours();
+    //console.log(greetHrs);
+    if (greetHrs < 12) {
+      setGreet('Hey There, Good Morning');
+    } else if (greetHrs > 12 && greetHrs < 16) {
+      setGreet('Good Afternoon Champ');
+    } else {
+      setGreet('Hi, Good Evening');
+    }
     let finishedIitems = await AsyncStorage.getItem('finishedItems');
     if (finishedIitems !== null) {
       let fItems = JSON.parse(finishedIitems);
@@ -414,16 +423,27 @@ const App = () => {
     }, 2000);
   }, []);
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={{flex: 1, fontFamily: 'indie_flower'}}>
       <SafeAreaView
-        style={{flex: 1, backgroundColor: '#344FA1', paddingHorizontal: 20}}>
+        style={{
+          flex: 1,
+          backgroundColor: '#344FA1',
+          paddingHorizontal: 20,
+          fontFamily: 'indie_flower',
+        }}>
         <StatusBar
           animated={true}
           backgroundColor="#344FA1"
           barStyle="light-content"
         />
 
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: -20, marginVertical: 10,}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginHorizontal: -20,
+            marginVertical: 10,
+          }}>
           <IconButton
             icon="plus"
             color="#fff"
@@ -431,7 +451,7 @@ const App = () => {
             onPress={handlePresentModalPress}
           />
           <IconButton
-            icon="calendar-check"
+            icon="clipboard-check"
             color="#ffff"
             size={25}
             onPress={showfinishedModal}
@@ -442,122 +462,146 @@ const App = () => {
           style={{
             color: '#fff',
             textAlign: 'left',
-            marginVertical: 20,
-            fontSize: 35,
+            marginBottom: 10,
+            fontSize: 28,
+            fontFamily: 'indie_flower',
           }}>
           {greet}
         </Title>
 
         {/* <ScrollView contentContainerStyle={styles.content}> */}
-        <Title
-          style={{
-            color: '#aaa',
-            textAlign: 'left',
-            marginBottom: 10,
-            fontSize: 15,
-          }}>
-          Overdue Tasks
-        </Title>
-        <ScrollView contentContainerStyle={styles.content} horizontal={true}>
-          {overdueItems.length !== 0 ? (
-            overdueItems.map((item, i) => {
-              return (
-                <Surface key={i} style={styles.list2}>
-                  {/* <Checkbox
+        <View>
+          <Title
+            style={{
+              color: '#aaa',
+              textAlign: 'left',
+              marginBottom: 10,
+              fontSize: 15,
+              fontFamily: 'indie_flower',
+            }}>
+            OVERDUE TASKS
+          </Title>
+          <ScrollView contentContainerStyle={styles.content} horizontal={true}>
+            {overdueItems.length !== 0 ? (
+              overdueItems.map((item, i) => {
+                return (
+                  <Surface key={i} style={styles.list2}>
+                    {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
                   setChecked(!checked);
                 }}
               /> */}
 
-                  <BouncyCheckbox
-                    size={20}
-                    fillColor="#042159"
-                    unfillColor="#FFFFFF"
-                    isChecked={false}
-                    text={item.task}
-                    iconStyle={{borderColor: '#042159'}}
-                    textStyle={{
-                      fontFamily: 'JosefinSans-Regular',
-                      color: '#fff',
-                    }}
-                    onPress={() => {
-                      setChecked(!checked);
-                      delItem(item.task, item.date, item.time, item.millisecs);
-                    }}
-                  />
-                  <Text
-                    style={{
-                      color: '#344FA1',
-                      marginTop: 20,
-                    }}>{`${item.date}, ${item.time}`}</Text>
-                </Surface>
-              );
-            })
-          ) : (
-            <Text style={{color: '#aaa'}}>No overdue tasks</Text>
-          )}
-        </ScrollView>
-
-        <Title
-          style={{
-            color: '#aaa',
-            textAlign: 'left',
-            marginBottom: 10,
-            fontSize: 15,
-          }}>
-          Today Tasks
-        </Title>
-        <ScrollView contentContainerStyle={styles.content} horizontal={true}>
-          {todayItems.length !== 0 ? (
-            todayItems.map((item, i) => {
-              return (
-                <Surface key={i} style={styles.list2}>
-                  {/* <Checkbox
+                    <BouncyCheckbox
+                      size={20}
+                      fillColor="#042159"
+                      unfillColor="#042159"
+                      isChecked={false}
+                      text={item.task}
+                      iconStyle={{borderColor: '#D707F2'}}
+                      textStyle={{
+                        fontFamily: 'indie_flower',
+                        color: '#fff',
+                      }}
+                      onPress={() => {
+                        setChecked(!checked);
+                        delItem(
+                          item.task,
+                          item.date,
+                          item.time,
+                          item.millisecs,
+                        );
+                      }}
+                    />
+                    <Text
+                      style={{
+                        color: '#344FA1',
+                        marginTop: 20,
+                        fontFamily: 'indie_flower',
+                      }}>{`${item.date}, ${item.time}`}</Text>
+                  </Surface>
+                );
+              })
+            ) : (
+              <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
+                No overdue tasks
+              </Text>
+            )}
+          </ScrollView>
+        </View>
+        <View>
+          <Title
+            style={{
+              color: '#aaa',
+              textAlign: 'left',
+              marginBottom: 10,
+              fontSize: 15,
+              fontFamily: 'indie_flower',
+            }}>
+            TODAY TASKS
+          </Title>
+          <ScrollView contentContainerStyle={styles.content} horizontal={true}>
+            {todayItems.length !== 0 ? (
+              todayItems.map((item, i) => {
+                return (
+                  <Surface key={i} style={styles.list2}>
+                    {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
                   setChecked(!checked);
                 }}
               /> */}
 
-                  <BouncyCheckbox
-                    size={20}
-                    fillColor="#042159"
-                    unfillColor="#FFFFFF"
-                    isChecked={false}
-                    text={item.task}
-                    iconStyle={{borderColor: '#042159'}}
-                    textStyle={{
-                      fontFamily: 'JosefinSans-Regular',
-                      color: '#fff',
-                    }}
-                    onPress={() => {
-                      setChecked(!checked);
-                      delItem(item.task, item.date, item.time, item.millisecs);
-                    }}
-                  />
-                  <Text
-                    style={{
-                      color: '#344FA1',
-                      marginTop: 20,
-                    }}>{`${item.date}, ${item.time}`}</Text>
-                </Surface>
-              );
-            })
-          ) : (
-            <Text style={{color: '#aaa'}}>No tasks scheduled for today</Text>
-          )}
-        </ScrollView>
+                    <BouncyCheckbox
+                      size={20}
+                      fillColor="#042159"
+                      unfillColor="#042159"
+                      isChecked={false}
+                      text={item.task}
+                      iconStyle={{borderColor: '#D707F2'}}
+                      textStyle={{
+                        fontFamily: 'indie_flower',
+                        color: '#fff',
+                      }}
+                      onPress={() => {
+                        setChecked(!checked);
+                        delItem(
+                          item.task,
+                          item.date,
+                          item.time,
+                          item.millisecs,
+                        );
+                      }}
+                    />
+                    <Text
+                      style={{
+                        color: '#344FA1',
+                        marginTop: 20,
+                        fontFamily: 'indie_flower',
+                      }}>{`${item.date}, ${item.time}`}</Text>
+                  </Surface>
+                );
+              })
+            ) : (
+              <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
+                No tasks scheduled for today
+              </Text>
+            )}
+          </ScrollView>
+        </View>
+
         <Title
           style={{
             color: '#aaa',
             textAlign: 'left',
             marginBottom: 10,
             fontSize: 15,
+            fontFamily: 'indie_flower',
           }}>
-          Other Tasks
+          OTHER TASKS
         </Title>
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView contentContainerStyle={styles.content2} horizontal={false}>
           {otherItems.length !== 0 ? (
             otherItems.map((item, i) => {
               return (
@@ -572,12 +616,12 @@ const App = () => {
                   <BouncyCheckbox
                     size={20}
                     fillColor="#042159"
-                    unfillColor="#FFFFFF"
+                    unfillColor="#042159"
                     isChecked={false}
                     text={item.task}
-                    iconStyle={{borderColor: '#042159'}}
+                    iconStyle={{borderColor: '#D707F2'}}
                     textStyle={{
-                      fontFamily: 'JosefinSans-Regular',
+                      fontFamily: 'indie_flower',
                       color: '#fff',
                     }}
                     onPress={() => {
@@ -589,14 +633,18 @@ const App = () => {
                     style={{
                       color: '#344FA1',
                       marginTop: 10,
+                      fontFamily: 'indie_flower',
                     }}>{`${item.date}, ${item.time}`}</Text>
                 </Surface>
               );
             })
           ) : (
-            <Text style={{color: '#aaa'}}>No other tasks</Text>
+            <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
+              No other tasks
+            </Text>
           )}
         </ScrollView>
+
         {/* </ScrollView> */}
 
         <FAB style={styles.fab} icon="plus" onPress={handlePresentModalPress} />
@@ -671,7 +719,12 @@ const App = () => {
               onDismiss={hidefinishedModal}
               contentContainerStyle={styles.containerStyle}>
               <Text
-                style={{fontSize: 20, color: '#D707F2', textAlign: 'center'}}>
+                style={{
+                  fontSize: 20,
+                  color: '#D707F2',
+                  textAlign: 'center',
+                  fontFamily: 'indie_flower',
+                }}>
                 Finished Tasks!
               </Text>
               <ScrollView>
@@ -683,17 +736,21 @@ const App = () => {
                           style={{
                             color: '#fff',
                             fontSize: 20,
+                            fontFamily: 'indie_flower',
                           }}>{`${item.task}`}</Text>
                         <Text
                           style={{
                             color: '#aaa',
                             marginTop: 10,
+                            fontFamily: 'indie_flower',
                           }}>{`${item.date}, ${item.time}`}</Text>
                       </View>
                     );
                   })
                 ) : (
-                  <Text style={{color: '#aaa'}}>No finsihed tasks</Text>
+                  <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
+                    No finsihed tasks
+                  </Text>
                 )}
               </ScrollView>
             </Modal>
@@ -721,6 +778,7 @@ const App = () => {
                 color: '#000',
                 textAlign: 'center',
                 marginVertical: 20,
+                fontFamily: 'indie_flower',
               }}>
               Add a task!
             </Text>
@@ -732,7 +790,15 @@ const App = () => {
                 outlineColor="#fff"
                 activeOutlineColor="#D707F2"
                 mode="outlined"
-                style={{width: '100%', height: 40, marginVertical: 20}}
+                placeholderStyle={{
+                  fontFamily: 'indie_flower',
+                }}
+                style={{
+                  width: '100%',
+                  height: 40,
+                  marginVertical: 20,
+                  fontFamily: 'indie_flower',
+                }}
               />
 
               <View
@@ -762,11 +828,21 @@ const App = () => {
                   marginBottom: 20,
                 }}>
                 <Text
-                  style={{color: '#aaa', width: '50%', textAlign: 'center'}}>
+                  style={{
+                    color: '#aaa',
+                    width: '50%',
+                    textAlign: 'center',
+                    fontFamily: 'indie_flower',
+                  }}>
                   {date}
                 </Text>
                 <Text
-                  style={{color: '#aaa', width: '50%', textAlign: 'center'}}>
+                  style={{
+                    color: '#aaa',
+                    width: '50%',
+                    textAlign: 'center',
+                    fontFamily: 'indie_flower',
+                  }}>
                   {time}
                 </Text>
               </View>
@@ -774,7 +850,11 @@ const App = () => {
                 color="#D707F2"
                 mode="contained"
                 onPress={addText}
-                style={{width: '100%', marginVertical: 20}}>
+                style={{
+                  width: '100%',
+                  marginVertical: 20,
+                  fontFamily: 'indie_flower',
+                }}>
                 Add Task
               </Button>
             </View>
@@ -794,37 +874,41 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.27,
     shadowRadius: 4.65,
-
+    fontFamily: 'indie_flower',
     elevation: 46,
-  },
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: 'grey',
   },
   contentContainer: {
     flex: 1,
     alignItems: 'center',
+    fontFamily: 'indie_flower',
   },
   content: {
     alignItems: 'center',
     paddingVertical: 20,
     paddingRight: 20,
     height: 130,
+    fontFamily: 'indie_flower',
+  },
+  content2: {
+    alignItems: 'center',
+    fontFamily: 'indie_flower',
   },
   text: {
     fontSize: 20,
     color: 'white',
+    fontFamily: 'indie_flower',
   },
   header: {
     width: '100%',
     paddingHorizontal: 30,
     alignItems: 'center',
+    fontFamily: 'indie_flower',
   },
   list2: {
     backgroundColor: '#042159',
     justifyContent: 'center',
     width: 220,
+    fontFamily: 'indie_flower',
     borderRadius: 10,
     height: 120,
     marginHorizontal: 10,
@@ -837,14 +921,16 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 10,
     height: 70,
-    marginHorizontal: 10,
+    fontFamily: 'indie_flower',
+    marginVertical: 10,
     padding: 20,
-    elevation: 10,
+    elevation: 5,
   },
   list4: {
     backgroundColor: '#042159',
     width: '100%',
     marginVertical: 20,
+    fontFamily: 'indie_flower',
     borderRadius: 10,
     padding: 15,
   },
@@ -852,6 +938,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 16,
     right: 0,
+    fontFamily: 'indie_flower',
     bottom: 0,
     backgroundColor: '#D707F2',
   },
@@ -859,6 +946,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 30,
     margin: 30,
+    fontFamily: 'indie_flower',
     borderRadius: 10,
   },
 });
