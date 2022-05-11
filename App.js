@@ -14,11 +14,9 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  Appbar,
   TextInput,
   Button,
   FAB,
-  TouchableRipple,
   Modal,
   Portal,
   Text,
@@ -31,11 +29,12 @@ import SplashScreen from 'react-native-splash-screen';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import Notifications from './Notifications';
 
 const App = () => {
   const [text, setText] = useState('');
   const [items, setItems] = useState([]);
-  const [visible, setVisible] = useState(false);
+  //const [visible, setVisible] = useState(false);
   const [finishedvisible, setFinishedVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [dateMode, setdateMode] = useState('date');
@@ -165,7 +164,19 @@ const App = () => {
     }
 
     //let cdDate = new Date(dates).getTime();
-    let cdDate;
+    let cdDate = 0;
+    if (date !== 'No date selected' && time === 'No time selcted') {
+      let mil = date;
+      let splitMilli = mil.split(' ');
+      cdDate = new Date(
+        Number(splitMilli[2]),
+        Number(months.indexOf(splitMilli[1])),
+        Number(splitMilli[0]),
+      ).getTime();
+      //console.log( cdDate );
+      //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
+      Notifications.schduleNotification(new Date(cdDate), text);
+    }
     if (date !== 'No date selected' && time !== 'No time selcted') {
       let mil = date;
       let mill = time;
@@ -192,10 +203,21 @@ const App = () => {
 
       let milll = mil + ' ' + mill;
 
-      cdDate = new Date(milll).getTime();
-      //console.log(cdDate);
+      let splitMilli = milll.split(' ');
+      let splitMilli2 = mill.split(':');
+      //let milll2 = `${splitMilli[1]} ${splitMilli[0]}, ${splitMilli[2]} ${splitMilli[3]}`;
+      cdDate = new Date(
+        Number(splitMilli[2]),
+        Number(months.indexOf(splitMilli[1])),
+        Number(splitMilli[0]),
+        Number(splitMilli2[0]),
+        Number(splitMilli2[1]),
+      ).getTime();
+      //console.log( cdDate );
+      //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
+      Notifications.schduleNotification(new Date(cdDate), text);
     } else {
-      cdDate = 16523081400000000;
+      cdDate = 265230814000000;
     }
     try {
       let texts = items;
@@ -231,11 +253,11 @@ const App = () => {
     let greetHrs = new Date().getHours();
     //console.log(greetHrs);
     if (greetHrs < 12) {
-      setGreet('Hey There, Good Morning');
+      setGreet('Hey There, Good Morning 😀');
     } else if (greetHrs > 12 && greetHrs < 16) {
-      setGreet('Good Afternoon Champ');
+      setGreet('Good Afternoon Champ 🔆');
     } else {
-      setGreet('Hi, Good Evening');
+      setGreet('Hi, Good Evening 🥱');
     }
     let finishedIitems = await AsyncStorage.getItem('finishedItems');
     if (finishedIitems !== null) {
@@ -421,6 +443,7 @@ const App = () => {
     setTimeout(function () {
       SplashScreen.hide();
     }, 2000);
+    //console.log(new Date(Date.now()));
   }, []);
   return (
     <GestureHandlerRootView style={{flex: 1, fontFamily: 'indie_flower'}}>
