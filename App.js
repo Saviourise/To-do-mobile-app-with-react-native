@@ -219,7 +219,7 @@ const App = () => {
       //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
       Notifications.schduleNotification(new Date(cdDate), text);
     } else {
-      console.log('hey');
+      //console.log('hey');
       cdDate = 265230814000000;
     }
     try {
