@@ -65,7 +65,7 @@ const App = () => {
   const bottomSheetModalRef = useRef(null);
 
   // variables
-  const snapPoints = useMemo(() => ['25%', '50%'], []);
+  const snapPoints = useMemo(() => ['25%', '55%'], []);
 
   // callbacks
   const handlePresentModalPress = useCallback(() => {
@@ -164,8 +164,10 @@ const App = () => {
     }
 
     //let cdDate = new Date(dates).getTime();
+    //console.log( date, time );
     let cdDate = 0;
-    if (date !== 'No date selected' && time === 'No time selcted') {
+    if (date !== 'No date selected' && time === 'No time selected') {
+      //console.log('hi');
       let mil = date;
       let splitMilli = mil.split(' ');
       cdDate = new Date(
@@ -173,11 +175,11 @@ const App = () => {
         Number(months.indexOf(splitMilli[1])),
         Number(splitMilli[0]),
       ).getTime();
-      //console.log( cdDate );
+      //console.log(cdDate);
       //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
       Notifications.schduleNotification(new Date(cdDate), text);
     }
-    if (date !== 'No date selected' && time !== 'No time selcted') {
+    else if (date !== 'No date selected' && time !== 'No time selected') {
       let mil = date;
       let mill = time;
       if (mill.includes('AM')) {
@@ -217,6 +219,7 @@ const App = () => {
       //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
       Notifications.schduleNotification(new Date(cdDate), text);
     } else {
+      console.log('hey');
       cdDate = 265230814000000;
     }
     try {
@@ -239,6 +242,11 @@ const App = () => {
         bottomSheetModalRef.current?.dismiss();
         //hideModal();
       });
+      ToastAndroid.showWithGravity(
+        'Task added: ' + text,
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM,
+      );
     } catch (error) {
       // Error saving data
       return ToastAndroid.showWithGravity(
@@ -254,7 +262,7 @@ const App = () => {
     //console.log(greetHrs);
     if (greetHrs < 12) {
       setGreet('Hey There, Good Morning 😀');
-    } else if (greetHrs > 12 && greetHrs < 16) {
+    } else if (greetHrs > 11 && greetHrs < 16) {
       setGreet('Good Afternoon Champ 🔆');
     } else {
       setGreet('Hi, Good Evening 🥱');
@@ -363,6 +371,7 @@ const App = () => {
     deleteDate,
     deleteTime,
     deleteMillisecs,
+    container,
   ) => {
     let delObj = {
       task: deleteItem,
@@ -410,10 +419,15 @@ const App = () => {
     try {
       const jsonValue = JSON.stringify(itemDel);
       await AsyncStorage.setItem('items', jsonValue).then(() => {
-        setItems([]);
-        setTodayItems([]);
-        setOverdueItems([]);
-        setOtherItems([]);
+        //setItems([]);
+        if (container === 'overdue') {
+          setOverdueItems([]);
+        } else if (container === 'today') {
+          setTodayItems([]);
+        } else {
+          setOtherItems([]);
+        }
+
         return ToastAndroid.showWithGravity(
           'Task Finished',
           ToastAndroid.SHORT,
@@ -488,187 +502,210 @@ const App = () => {
             marginBottom: 10,
             fontSize: 28,
             fontFamily: 'indie_flower',
+            height: 40,
+            paddingTop: 10,
           }}>
           {greet}
         </Title>
 
-        {/* <ScrollView contentContainerStyle={styles.content}> */}
-        <View>
-          <Title
-            style={{
-              color: '#aaa',
-              textAlign: 'left',
-              marginBottom: 10,
-              fontSize: 15,
-              fontFamily: 'indie_flower',
-            }}>
-            OVERDUE TASKS
-          </Title>
-          <ScrollView contentContainerStyle={styles.content} horizontal={true}>
-            {overdueItems.length !== 0 ? (
-              overdueItems.map((item, i) => {
-                return (
-                  <Surface key={i} style={styles.list2}>
-                    {/* <Checkbox
+        <ScrollView>
+          {overdueItems.length !== 0 ? (
+            <View>
+              <Title
+                style={{
+                  color: '#aaa',
+                  textAlign: 'left',
+                  marginBottom: 10,
+                  fontSize: 15,
+                  fontFamily: 'indie_flower',
+                }}>
+                OVERDUE TASKS
+              </Title>
+              <ScrollView
+                contentContainerStyle={styles.content}
+                horizontal={true}>
+                {overdueItems.map((item, i) => {
+                  return (
+                    <Surface key={i} style={styles.list2}>
+                      {/* <Checkbox
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={(isChecked: boolean) => {
                   setChecked(!checked);
                 }}
               /> */}
 
-                    <BouncyCheckbox
-                      size={20}
-                      fillColor="#042159"
-                      unfillColor="#042159"
-                      isChecked={false}
-                      text={item.task}
-                      iconStyle={{borderColor: '#D707F2'}}
-                      textStyle={{
-                        fontFamily: 'indie_flower',
-                        color: '#fff',
-                      }}
-                      onPress={() => {
-                        setChecked(!checked);
-                        delItem(
-                          item.task,
-                          item.date,
-                          item.time,
-                          item.millisecs,
-                        );
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: '#344FA1',
-                        marginTop: 20,
-                        fontFamily: 'indie_flower',
-                      }}>{`${item.date}, ${item.time}`}</Text>
-                  </Surface>
-                );
-              })
-            ) : (
-              <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
-                No overdue tasks
-              </Text>
-            )}
-          </ScrollView>
-        </View>
-        <View>
-          <Title
-            style={{
-              color: '#aaa',
-              textAlign: 'left',
-              marginBottom: 10,
-              fontSize: 15,
-              fontFamily: 'indie_flower',
-            }}>
-            TODAY TASKS
-          </Title>
-          <ScrollView contentContainerStyle={styles.content} horizontal={true}>
-            {todayItems.length !== 0 ? (
-              todayItems.map((item, i) => {
-                return (
-                  <Surface key={i} style={styles.list2}>
-                    {/* <Checkbox
-                status={checked ? 'checked' : 'unchecked'}
-                onPress={(isChecked: boolean) => {
-                  setChecked(!checked);
-                }}
-              /> */}
-
-                    <BouncyCheckbox
-                      size={20}
-                      fillColor="#042159"
-                      unfillColor="#042159"
-                      isChecked={false}
-                      text={item.task}
-                      iconStyle={{borderColor: '#D707F2'}}
-                      textStyle={{
-                        fontFamily: 'indie_flower',
-                        color: '#fff',
-                      }}
-                      onPress={() => {
-                        setChecked(!checked);
-                        delItem(
-                          item.task,
-                          item.date,
-                          item.time,
-                          item.millisecs,
-                        );
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: '#344FA1',
-                        marginTop: 20,
-                        fontFamily: 'indie_flower',
-                      }}>{`${item.date}, ${item.time}`}</Text>
-                  </Surface>
-                );
-              })
-            ) : (
-              <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
-                No tasks scheduled for today
-              </Text>
-            )}
-          </ScrollView>
-        </View>
-
-        <Title
-          style={{
-            color: '#aaa',
-            textAlign: 'left',
-            marginBottom: 10,
-            fontSize: 15,
-            fontFamily: 'indie_flower',
-          }}>
-          OTHER TASKS
-        </Title>
-        <ScrollView contentContainerStyle={styles.content2} horizontal={false}>
-          {otherItems.length !== 0 ? (
-            otherItems.map((item, i) => {
-              return (
-                <Surface key={i} style={styles.list3}>
-                  {/* <Checkbox
-                status={checked ? 'checked' : 'unchecked'}
-                onPress={(isChecked: boolean) => {
-                  setChecked(!checked);
-                }}
-              /> */}
-
-                  <BouncyCheckbox
-                    size={20}
-                    fillColor="#042159"
-                    unfillColor="#042159"
-                    isChecked={false}
-                    text={item.task}
-                    iconStyle={{borderColor: '#D707F2'}}
-                    textStyle={{
-                      fontFamily: 'indie_flower',
-                      color: '#fff',
-                    }}
-                    onPress={() => {
-                      setChecked(!checked);
-                      delItem(item.task, item.date, item.time, item.millisecs);
-                    }}
-                  />
-                  <Text
-                    style={{
-                      color: '#344FA1',
-                      marginTop: 10,
-                      fontFamily: 'indie_flower',
-                    }}>{`${item.date}, ${item.time}`}</Text>
-                </Surface>
-              );
-            })
+                      <BouncyCheckbox
+                        size={20}
+                        fillColor="#042159"
+                        unfillColor="#042159"
+                        isChecked={false}
+                        text={item.task}
+                        iconStyle={{borderColor: '#D707F2'}}
+                        textStyle={{
+                          fontFamily: 'indie_flower',
+                          color: '#fff',
+                        }}
+                        onPress={() => {
+                          setChecked(!checked);
+                          delItem(
+                            item.task,
+                            item.date,
+                            item.time,
+                            item.millisecs,
+                            'overdue',
+                          );
+                        }}
+                      />
+                      <Text
+                        style={{
+                          color: '#f00',
+                          marginTop: 20,
+                          fontFamily: 'indie_flower',
+                        }}>{`${item.date} - ${item.time}`}</Text>
+                    </Surface>
+                  );
+                })}
+              </ScrollView>
+            </View>
           ) : (
-            <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
-              No other tasks
-            </Text>
+            <></>
+            // <Text style={ { color: '#aaa', fontFamily: 'indie_flower' } }>
+            //       No overdue tasks
+            //     </Text>
           )}
-        </ScrollView>
 
-        {/* </ScrollView> */}
+          {
+            todayItems.length !== 0 ? (
+              <View>
+                <Title
+                  style={{
+                    color: '#aaa',
+                    textAlign: 'left',
+                    marginBottom: 10,
+                    fontSize: 15,
+                    fontFamily: 'indie_flower',
+                  }}>
+                  TODAY TASKS
+                </Title>
+                <ScrollView
+                  contentContainerStyle={styles.content}
+                  horizontal={true}>
+                  {todayItems.map((item, i) => {
+                    return (
+                      <Surface key={i} style={styles.list2}>
+                        {/* <Checkbox
+                status={checked ? 'checked' : 'unchecked'}
+                onPress={(isChecked: boolean) => {
+                  setChecked(!checked);
+                }}
+              /> */}
+
+                        <BouncyCheckbox
+                          size={20}
+                          fillColor="#042159"
+                          unfillColor="#042159"
+                          isChecked={false}
+                          text={item.task}
+                          iconStyle={{borderColor: '#D707F2'}}
+                          textStyle={{
+                            fontFamily: 'indie_flower',
+                            color: '#fff',
+                          }}
+                          onPress={() => {
+                            setChecked(!checked);
+                            delItem(
+                              item.task,
+                              item.date,
+                              item.time,
+                              item.millisecs,
+                              'today',
+                            );
+                          }}
+                        />
+                        <Text
+                          style={{
+                            color: '#344FA1',
+                            marginTop: 20,
+                            fontFamily: 'indie_flower',
+                          }}>{`${item.date} - ${item.time}`}</Text>
+                      </Surface>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            ) : (
+              <></>
+            )
+            // <Text style={ { color: '#aaa', fontFamily: 'indie_flower' } }>
+            //       No tasks scheduled for today
+            //     </Text>
+          }
+
+          {
+            otherItems.length !== 0 ? (
+              <View>
+                <Title
+                  style={{
+                    color: '#aaa',
+                    textAlign: 'left',
+                    marginBottom: 10,
+                    fontSize: 15,
+                    fontFamily: 'indie_flower',
+                  }}>
+                  OTHER TASKS
+                </Title>
+                <View style={styles.content2}>
+                  {otherItems.map((item, i) => {
+                    return (
+                      <Surface key={i} style={styles.list3}>
+                        {/* <Checkbox
+                status={checked ? 'checked' : 'unchecked'}
+                onPress={(isChecked: boolean) => {
+                  setChecked(!checked);
+                }}
+              /> */}
+
+                        <BouncyCheckbox
+                          size={20}
+                          fillColor="#042159"
+                          unfillColor="#042159"
+                          isChecked={false}
+                          text={item.task}
+                          iconStyle={{borderColor: '#D707F2'}}
+                          textStyle={{
+                            fontFamily: 'indie_flower',
+                            color: '#fff',
+                          }}
+                          onPress={() => {
+                            setChecked(!checked);
+                            delItem(
+                              item.task,
+                              item.date,
+                              item.time,
+                              item.millisecs,
+                              'other',
+                            );
+                          }}
+                        />
+                        <Text
+                          style={{
+                            color: '#344FA1',
+                            marginTop: 10,
+                            fontFamily: 'indie_flower',
+                          }}>{`${item.date} - ${item.time}`}</Text>
+                      </Surface>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : (
+              <></>
+            )
+            //   <Text style={{color: '#aaa', fontFamily: 'indie_flower'}}>
+            //   No other tasks
+            // </Text>
+          }
+        </ScrollView>
 
         <FAB style={styles.fab} icon="plus" onPress={handlePresentModalPress} />
 
@@ -818,7 +855,7 @@ const App = () => {
                 }}
                 style={{
                   width: '100%',
-                  height: 40,
+                  height: 60,
                   marginVertical: 20,
                   fontFamily: 'indie_flower',
                 }}
@@ -936,6 +973,7 @@ const styles = StyleSheet.create({
     height: 120,
     marginHorizontal: 10,
     padding: 20,
+    paddingRight: 30,
     elevation: 10,
   },
   list3: {
