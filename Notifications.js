@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import PushNotification from 'react-native-push-notification';
+import PushNotification, {Importance} from 'react-native-push-notification';
 import { Platform } from 'react-native';
 class Notifications {
   constructor() {
@@ -28,6 +28,7 @@ class Notifications {
         channelId: 'reminders', // (required)
         channelName: 'Task reminder notifications', // (required)
         channelDescription: 'Reminder for any tasks',
+        importance: Importance.HIGH,
       },
       () => {},
     );
@@ -42,6 +43,7 @@ class Notifications {
       channelId: 'reminders',
       title: message,
       message: '🔔 Reminder! You are supposed to do this task right now.',
+      allowWhileIdle: true,
       date,
     });
   }

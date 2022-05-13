@@ -30,6 +30,11 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import Notifications from './Notifications';
+import notifee, {
+  TimestampTrigger,
+  TriggerType,
+  AndroidImportance,
+} from '@notifee/react-native';
 
 const App = () => {
   const [text, setText] = useState('');
@@ -71,6 +76,7 @@ const App = () => {
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
+  
   const handleSheetChanges = useCallback((index: number) => {
     //console.log('handleSheetChanges', index);
   }, []);
@@ -175,11 +181,11 @@ const App = () => {
         Number(months.indexOf(splitMilli[1])),
         Number(splitMilli[0]),
       ).getTime();
+      onDisplayNotification(text, cdDate, time);
       //console.log(cdDate);
       //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
-      Notifications.schduleNotification(new Date(cdDate), text);
-    }
-    else if (date !== 'No date selected' && time !== 'No time selected') {
+      //Notifications.schduleNotification(new Date(cdDate), text);
+    } else if (date !== 'No date selected' && time !== 'No time selected') {
       let mil = date;
       let mill = time;
       if (mill.includes('AM')) {
@@ -215,9 +221,10 @@ const App = () => {
         Number(splitMilli2[0]),
         Number(splitMilli2[1]),
       ).getTime();
+      onDisplayNotification(text, cdDate, time);
       //console.log( cdDate );
       //console.log(new Date(Number(splitMilli[2]), Number(months.indexOf(splitMilli[1])), Number(splitMilli[0]), Number(splitMilli2[0])+1, Number(splitMilli2[1])));
-      Notifications.schduleNotification(new Date(cdDate), text);
+      //Notifications.schduleNotification(new Date(cdDate), text);
     } else {
       //console.log('hey');
       cdDate = 265230814000000;
@@ -265,7 +272,7 @@ const App = () => {
     } else if (greetHrs > 11 && greetHrs < 16) {
       setGreet('Good Afternoon Champ 🔆');
     } else {
-      setGreet('Hi, Good Evening 🥱');
+      setGreet('Hi, Good Evening 😴');
     }
     let finishedIitems = await AsyncStorage.getItem('finishedItems');
     if (finishedIitems !== null) {
@@ -451,13 +458,92 @@ const App = () => {
   //   getItems();
   // }, 60000);
 
+  async function onDisplayNotification(text, cdDate, time) {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: String(cdDate),
+      name: text,
+      importance: AndroidImportance.HIGH,
+      sound: 'sound',
+    });
+
+    // Create a time-based trigger
+    const trigger: TimestampTrigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: cdDate, // fire at 11:10am (10 minutes before meeting)
+    };
+
+    // Create a trigger notification
+    await notifee.createTriggerNotification(
+      {
+        title: `<h2 style="color: #344FA1;"><b>${text}</b></h2>`,
+        body: `Today at ${ time }`,
+        subtitle: 'to do',
+        color: '#344FA1',
+        android: {
+          channelId: channelId,
+          importance: AndroidImportance.HIGH,
+          sound: 'sound',
+        },
+      },
+      trigger,
+    );
+    // // Display a notification
+    // await notifee.displayNotification({
+    //   title: 'Notification Title',
+    //   body: 'Main body content of the notification',
+    //   android: {
+    //     channelId,
+    //   },
+    // });
+  }
+
   //Hide Splash screen on app load.
   useEffect(() => {
     getItems();
     setTimeout(function () {
       SplashScreen.hide();
     }, 2000);
+    //onDisplayNotification();
+    // return notifee.onForegroundEvent(({type, detail}) => {
+    //   switch (type) {
+    //     case EventType.DISMISSED:
+    //       console.log('User dismissed notification', detail.notification);
+    //       break;
+    //     case EventType.PRESS:
+    //       console.log('User pressed notification', detail.notification);
+    //       break;
+    //   }
+    //});
     //console.log(new Date(Date.now()));
+
+    // const alarm = {
+    //   alarm_id: 3,
+    //   alarm_time: '17:50:00', // HH:mm:00
+    //   alarm_title: 'title',
+    //   alarm_text: 'text',
+    //   alarm_sound: 'sound', // sound.mp3
+    //   alarm_icon: 'icon', // icon.png
+    //   alarm_sound_loop: true,
+    //   alarm_vibration: true,
+    //   alarm_noti_removable: true,
+    //   alarm_activate: true,
+    // };
+
+    // Alarm.schedule(
+    //   alarm,
+    //   success => console.log(success), // success message
+    //   fail => console.log(fail), // fail message
+    // );
+
+    // Alarm.stop(
+    //   success => console.log(success),  // success message
+    //   fail => console.log(fail)         // fail message
+    // );
+    // Alarm.searchAll(
+    //   success => console.log(success),  // alarm list
+    //   fail => console.log(fail)         // fail message
+    // );
   }, []);
   return (
     <GestureHandlerRootView style={{flex: 1, fontFamily: 'indie_flower'}}>
@@ -508,7 +594,7 @@ const App = () => {
           {greet}
         </Title>
 
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={true}>
           {overdueItems.length !== 0 ? (
             <View>
               <Title
@@ -523,7 +609,8 @@ const App = () => {
               </Title>
               <ScrollView
                 contentContainerStyle={styles.content}
-                horizontal={true}>
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}>
                 {overdueItems.map((item, i) => {
                   return (
                     <Surface key={i} style={styles.list2}>
@@ -589,7 +676,8 @@ const App = () => {
                 </Title>
                 <ScrollView
                   contentContainerStyle={styles.content}
-                  horizontal={true}>
+                  horizontal={ true }
+                  showsHorizontalScrollIndicator={false}>
                   {todayItems.map((item, i) => {
                     return (
                       <Surface key={i} style={styles.list2}>
@@ -974,7 +1062,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     padding: 20,
     paddingRight: 30,
-    elevation: 10,
+    elevation: 3,
   },
   list3: {
     backgroundColor: '#042159',
